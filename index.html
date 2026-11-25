@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="tr" class="is-loading">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SCYLLA CHARYBDIS</title>
+<meta name="description" content="░▒▓ ████ ▓▒░">
+<meta name="theme-color" content="#030204">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SCYLLA CHARYBDIS">
+<meta property="og:description" content="░▒▓ ████ ▓▒░">
+<meta property="og:url" content="https://tunalper.github.io/">
+<meta property="og:image" content="https://tunalper.github.io/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/sc-pixel.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="js/main.js">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* critical: the loader must paint before anything else arrives */
+  html,body{margin:0;background:#030204}
+  #loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#030204;transition:opacity .6s steps(6)}
+  .ld{display:flex;flex-direction:column;align-items:center;gap:26px}
+  .ld-chain{display:flex;gap:12px}
+  .ld-chain i{position:relative;width:22px;height:22px;box-sizing:border-box;border:2px solid #281436;background:#08050c}
+  .ld-chain i+i::before{content:'';position:absolute;left:-14px;top:8px;width:12px;height:2px;background:#281436}
+  .ld-chain i.on{background:#470b1a;border-color:#bd173a;box-shadow:0 0 14px #bd173a55}
+  .ld-chain i.on::before{background:#8f132e}
+  .ld-chain i.on::after{content:'';position:absolute;left:4px;top:4px;width:4px;height:4px;background:#ea2250}
+  .ld-chain i.on:last-child{background:#8f132e}
+  @media (max-width:560px){.ld-chain{gap:8px}.ld-chain i{width:16px;height:16px}.ld-chain i+i::before{left:-10px;top:5px;width:8px}.ld-chain i.on::after{left:3px;top:3px;width:3px;height:3px}}
+  html.is-loaded #loader{opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="loader" role="progressbar" aria-label="Yükleniyor" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <div class="ld">
+    <div class="ld-chain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ld-hash" aria-hidden="true">0x0000000000000000</div>
+  </div>
+</div>
+
+<div id="stage" aria-hidden="true">
+  <canvas id="world"></canvas>
+</div>
+
+<div id="fx" aria-hidden="true">
+  <div class="fx-scan"></div>
+  <div class="fx-grain"></div>
+  <div class="fx-vig"></div>
+  <div class="fx-flick"></div>
+</div>
+
+<div id="hud">
+  <!-- persistent frame -->
+  <div class="corner c-tl" aria-hidden="true">
+    <span class="sym">Ψ</span>
+    <span data-scr="coords">38°14′48″ · 15°41′28″</span>
+  </div>
+  <div class="corner c-tr" aria-hidden="true">
+    <span data-height>#000000</span>
+    <span class="sym">⌬</span>
+  </div>
+  <div class="corner c-bl" aria-hidden="true">
+    <span class="meter" data-meter><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  </div>
+
+  <!-- 1 · boot -->
+  <div class="g g-boot" data-g="boot" aria-hidden="true">
+    <ol class="boot" data-boot></ol>
+  </div>
+  <div class="g g-hint" data-g="hint" aria-hidden="true">
+    <span class="hint-line"></span>
+    <span class="hint-glyph">↓</span>
+  </div>
+
+  <!-- 2 · strait: two locked targets -->
+  <div class="g g-strait" data-g="strait" aria-hidden="true">
+    <div class="target t-scylla" data-target="scylla">
+      <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br br2"></i>
+      <div class="t-tag"><span class="sym">Ψ</span><span data-scr="tag-a">█████ ▓▓</span></div>
+      <div class="t-dist" data-dist="scylla">0000.0</div>
+    </div>
+    <div class="target t-charyb" data-target="charybdis">
+      <i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br br2"></i>
+      <div class="t-tag"><span class="sym">&#xE005;</span><span data-scr="tag-b">████████ ▓</span></div>
+      <div class="t-dist" data-dist="charybdis">0000.0</div>
+    </div>
+    <div class="warn" data-warn><span class="sym">⚠</span><span data-scr="warn">░▒▓ ███ ▓▒░</span></div>
+  </div>
+
+  <!-- 3 · core readouts -->
+  <div class="g g-core" data-g="core" aria-hidden="true">
+    <div class="ro ro-l">
+      <div><span class="sym">₿</span> <span data-scr="supply">21000000</span></div>
+      <div><span class="sym">Σ</span> <span data-scr="sig">0x██▓▓ e81a</span></div>
+      <div><span class="sym">⌬</span> <span data-scr="nodes">███ 7f</span></div>
+      <div class="bars" data-bars><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="ro ro-r">
+      <div><span data-scr="rate">██.▓ ░░/s</span> <span class="sym">↯</span></div>
+      <div><span data-scr="diff">░▒ 0000000019d6</span></div>
+      <div><span data-scr="pulse">◆ ◇ ◇ ◇</span></div>
+    </div>
+    <div class="pips" data-pips><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <!-- 4 · ledger -->
+  <div class="g g-ledger" data-g="ledger" aria-hidden="true">
+    <div class="sha" data-sha>
+      <div class="sha-h"><span class="sym">Σ</span><span class="hot">SHA-256d</span><span class="dim">genesis</span><span data-sha-st>1/3</span><span data-sha-t>t=00</span></div>
+      <div class="sha-regs" data-sha-regs></div>
+      <div class="sha-kw"><span class="dim">K</span><b data-sha-k>428a2f98</b><span class="dim">W</span><b data-sha-w>01000000</b><span class="dim">T1</span><b data-sha-t1>00000000</b></div>
+      <div class="sha-ops dim"><span>Σ0(a) ⊕ Maj(a,b,c)</span><span>Σ1(e) ⊕ Ch(e,f,g)</span></div>
+      <div class="sha-bar"><i data-sha-bar></i></div>
+      <div class="sha-out"><span class="dim">H</span><b data-sha-out>▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓</b><span data-sha-ok></span></div>
+    </div>
+    <div class="addr" data-addr>
+      <div><span data-a="0"><i class="dim">priv</i> ▓▓▓▓▓▓▓▓▓▓</span> <span class="ar">→</span> <span data-a="1"><i class="dim">pub</i> 04678afdb0fe…</span></div>
+      <div><span class="ar">→</span> <span data-a="2"><i class="dim">sha256</i> 261c1eb2…</span> <span class="ar">→</span> <span data-a="3"><i class="dim">ripemd160</i> 62e907b1…</span></div>
+      <div><span class="ar">→</span> <span data-a="4">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span></div>
+    </div>
+    <div class="ledger">
+      <div class="lg-head"><span>#</span><span>Σ</span><span>▓▓▓▓</span><span>₿</span><span>·</span></div>
+      <div class="lg-rows" data-ledger></div>
+    </div>
+  </div>
+
+  <!-- 5 · signal: something is coming -->
+  <div class="g g-signal" data-g="signal" aria-hidden="true">
+    <div class="rec"><span class="rec-dot"></span><span data-tc>00:00:00:00</span></div>
+    <div class="scan-band" data-band>
+      <div class="sb-ticks"></div>
+      <div class="sb-needle" data-needle></div>
+      <div class="sb-read"><span data-freq>000.0</span><span class="sym">≈</span></div>
+    </div>
+  </div>
+  <button class="vault" data-g="vault" type="button" aria-label="Kilitli kayıt" data-magnet>
+    <span class="v-top"><span class="sym v-lock">&#xE000;</span><span data-scr="v-title">████ ███████</span></span>
+    <span class="v-bar"><i></i></span>
+    <span class="v-row"><span data-scr="v-key">▓▓▓▓-▓▓▓▓-▓▓▓▓</span><span class="v-pct" data-pct>87%</span></span>
+    <span class="v-row"><span class="sym">◉</span><span data-cd>??:??:??</span></span>
+    <span class="v-deny" aria-hidden="true">✕ ∅</span>
+  </button>
+
+  <!-- 6 · closing: a block is found -->
+  <div class="g g-closing" data-g="closing" aria-hidden="true">
+    <div class="mine">
+      <div class="m-h"><span class="sym">⌬</span><span class="hot">block</span><span data-m-height>#840000</span><span class="dim" data-m-state>mining</span></div>
+      <div class="m-wide"><span class="dim">prev  </span><b data-m-prev>0000000000000000000320283a032748…</b></div>
+      <div class="m-wide"><span class="dim">merkle</span><b data-m-root>a6b6c8f1d2e3…</b></div>
+      <div><span class="dim">bits  </span><b>17034219</b>  <span class="dim">nonce</span> <b data-nonce>0x00000000</b></div>
+      <div><span class="dim">target</span><b class="m-t">00000000000000000003422a…</b></div>
+      <ol class="m-hashes" data-hashes><li></li><li></li><li></li></ol>
+      <div class="m-conf"><span data-m-conf>◇◇◇◇◇◇</span><span class="dim">6 conf</span><span class="hot" data-m-final></span></div>
+    </div>
+  </div>
+  <button class="again" data-g="again" type="button" aria-label="Başa dön" data-magnet>
+    <span class="sym">↺</span>
+  </button>
+</div>
+
+<nav id="nav" aria-label="Sahneler">
+  <ol>
+    <li><button type="button" data-jump="0" aria-label="Açılış" data-magnet><span class="sym">◇</span></button></li>
+    <li><button type="button" data-jump="1" aria-label="Boğaz" data-magnet><span class="sym">≈</span></button></li>
+    <li><button type="button" data-jump="2" aria-label="Çekirdek" data-magnet><span class="sym">₿</span></button></li>
+    <li><button type="button" data-jump="3" aria-label="Defter" data-magnet><span class="sym">Ξ</span></button></li>
+    <li><button type="button" data-jump="4" aria-label="Sinyal" data-magnet><span class="sym">◉</span></button></li>
+    <li><button type="button" data-jump="5" aria-label="Kapanış" data-magnet><span class="sym">⌬</span></button></li>
+  </ol>
+  <div class="nav-rail" aria-hidden="true"><i data-rail></i></div>
+</nav>
+
+<button id="snd" type="button" aria-label="Sesi aç" aria-pressed="false" data-magnet>
+  <span class="sym snd-off">&#xE002;</span><span class="sym snd-on">&#xE003;</span>
+</button>
+
+<div id="cursor" aria-hidden="true"><i class="cur-ring"></i></div>
+<canvas id="arm" aria-hidden="true"></canvas>
+
+<main id="story">
+  <section class="sc" id="acilis" style="--len:1.0">
+    <h1 class="sr">SCYLLA CHARYBDIS</h1>
+    <p class="sr">Karanlıkta bir sistem açılıyor; harfler gürültüden çözülerek iki adı oluşturuyor.</p>
+  </section>
+  <section class="sc" id="bogaz" style="--len:3.3">
+    <h2 class="sr">Boğaz</h2>
+    <p class="sr">Fırtınalı, karanlık bir deniz. Solda kayalıklar ve gölgede çok başlı bir canavar; sağda dönen dev bir girdap. Küçük bir gemi ikisinin arasından geçiyor, sonra girdabın içine çekiliyor.</p>
+  </section>
+  <section class="sc" id="cekirdek" style="--len:3.5">
+    <h2 class="sr">Çekirdek</h2>
+    <p class="sr">Girdabın merkezinden dönen, nabız gibi parlayan piksel bir Bitcoin simgesi yükseliyor; etrafında birbirine bağlanan bloklar ve onlara akan veri.</p>
+  </section>
+  <section class="sc" id="defter" style="--len:2.8">
+    <h2 class="sr">Defter</h2>
+    <p class="sr">Akan hash yağmuru ve karartılmış kayıtlar; satırlar çözülür gibi olup yeniden bozuluyor.</p>
+  </section>
+  <section class="sc" id="sinyal" style="--len:3.2">
+    <h2 class="sr">Sinyal</h2>
+    <p class="sr">Bir kayıt ışığı yanıyor, bir ses dalgası titriyor. Kilitli bir panel: bir şey geliyor.</p>
+  </section>
+  <section class="sc" id="kapanis" style="--len:3.8">
+    <h2 class="sr">Kapanış</h2>
+    <p class="sr">Yeni bir blok kazılıp zincire ekleniyor; ekran kararıyor ve başlık geri dönüyor.</p>
+  </section>
+</main>
+
+<noscript>
+  <div class="nojs"><span>SCYLLA CHARYBDIS</span></div>
+</noscript>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
